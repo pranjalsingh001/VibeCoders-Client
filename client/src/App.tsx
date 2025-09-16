@@ -68,6 +68,7 @@ function Router() {
       <div className="pt-16 min-h-screen">
         <Switch>
           <Route path="/" component={DashboardPage} />
+          <Route path="/dashboard" component={DashboardPage} />
           <Route path="/workflow/:projectId" component={WorkflowPage} />
           <Route path="/workspace/:projectId" component={WorkspacePage} />
           <Route component={NotFound} />
