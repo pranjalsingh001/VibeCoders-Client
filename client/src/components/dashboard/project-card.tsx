@@ -85,7 +85,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const progress = getProgressPercentage(stage, status);
   
   const handleCardClick = () => {
-    setLocation(`/workflow/${project.id}`);
+    setLocation(`/workflow/${project._id || project.id}`);
   };
 
   const formatDate = (date: string | Date) => {

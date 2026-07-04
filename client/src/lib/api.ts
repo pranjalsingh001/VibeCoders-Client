@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/lib/stores/auth-store';
 
-const API_BASE = '';
+const API_BASE = 'http://localhost:5000/api/v1';
 
 class APIError extends Error {
   constructor(public status: number, message: string) {
@@ -9,7 +9,7 @@ class APIError extends Error {
   }
 }
 
-async function apiCall(endpoint: string, options: RequestInit = {}) {
+export async function apiCall(endpoint: string, options: RequestInit = {}) {
   const { token } = useAuthStore.getState();
   
   const headers: Record<string, string> = {
@@ -20,7 +20,7 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
-  
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
@@ -44,85 +44,56 @@ export const api = {
   // Auth
   auth: {
     login: (data: { email: string; password: string }) =>
-      apiCall('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-    
+      apiCall('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+
     signup: (data: { username: string; email: string; password: string }) =>
-      apiCall('/api/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+      apiCall('/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
+
+    me: () => apiCall('/auth/me'),
   },
-  
+
   // Projects
   projects: {
-    list: () => apiCall('/api/projects'),
-    
-    get: (id: string) => apiCall(`/api/projects/${id}`),
-    
+    list: () => apiCall('/projects'),
+    get: (id: string) => apiCall(`/projects/${id}`),
     create: (data: { name: string; description: string }) =>
-      apiCall('/api/projects', {
+      apiCall('/projects', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ name: data.name, idea: data.description }),
       }),
   },
-  
-  // Workflow
+
+  // Workflow (nested under projects)
   workflow: {
-    getStatus: (projectId: string) => apiCall(`/api/workflow/${projectId}/status`),
-    
-    next: (projectId: string, data: any) =>
-      apiCall(`/api/workflow/${projectId}/next`, {
+    getStatus: (projectId: string) => apiCall(`/projects/${projectId}/workflow/status`),
+    next: (projectId: string, data?: any) =>
+      apiCall(`/projects/${projectId}/workflow/next`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(data || {}),
       }),
+    reset: (projectId: string) =>
+      apiCall(`/projects/${projectId}/workflow/reset`, { method: 'POST', body: JSON.stringify({}) }),
   },
-  
-  // AI Stages
-  planning: (data: { projectId: string; answers: any[] }) =>
-    apiCall('/api/planning', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  
-  blueprint: (data: { projectId: string; blueprint: any }) =>
-    apiCall('/api/blueprint', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  
-  design: {
-    hld: (data: { projectId: string; hld: any }) =>
-      apiCall('/api/design/hld', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
-    
-    lld: (data: { projectId: string; lld: any }) =>
-      apiCall('/api/design/lld', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+
+  // Planning
+  planning: {
+    clarify: (data: { projectId: string; projectName?: string; ideaDescription?: string }) =>
+      apiCall('/planning/clarify', { method: 'POST', body: JSON.stringify(data) }),
+    submitAnswers: (data: { projectId: string; answers: any[] }) =>
+      apiCall('/planning/clarify/answer', { method: 'POST', body: JSON.stringify(data) }),
+    getDocs: (projectId: string) => apiCall(`/planning/docs?projectId=${projectId}`),
   },
-  
-  codegen: (data: { projectId: string; codegenPlan: any }) =>
-    apiCall('/api/codegen', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  
+
   // Files
   files: {
-    list: (projectId: string) => apiCall(`/api/files/${projectId}`),
-    
-    create: (data: { projectId: string; path: string; content: string; language?: string }) =>
-      apiCall('/api/files', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+    list: (projectId: string, dir?: string, recursive?: boolean) =>
+      apiCall(`/files/list?projectId=${projectId}${dir ? `&dir=${encodeURIComponent(dir)}` : ''}${recursive ? '&recursive=true' : ''}`),
+    read: (projectId: string, relativePath: string) =>
+      apiCall(`/files/read?projectId=${projectId}&relativePath=${encodeURIComponent(relativePath)}`),
+    write: (data: { projectId: string; relativePath: string; content: string }) =>
+      apiCall('/files/write', { method: 'POST', body: JSON.stringify(data) }),
   },
 };
+
 
 export { APIError };

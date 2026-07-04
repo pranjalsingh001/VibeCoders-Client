@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -16,6 +16,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 export default function LoginPage() {
   const { toast } = useToast();
   const { setAuth } = useAuthStore();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginData>({
@@ -34,6 +35,7 @@ export default function LoginPage() {
         title: 'Welcome back!',
         description: 'Successfully signed in to your account.',
       });
+      setLocation('/dashboard');
     },
     onError: (error: any) => {
       toast({

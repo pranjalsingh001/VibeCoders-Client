@@ -35,7 +35,7 @@ export function CreateProjectModal({ onClose }: CreateProjectModalProps) {
   const createProjectMutation = useMutation({
     mutationFn: api.projects.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/projects'] });
       toast({
         title: 'Project created!',
         description: 'Your new project has been created successfully.',

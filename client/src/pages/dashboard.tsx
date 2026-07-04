@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Folder, PlayCircle, CheckCircle, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,10 +12,12 @@ import { useState } from 'react';
 export default function DashboardPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ['/api/projects'],
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['/projects'],
     queryFn: () => api.projects.list(),
   });
+
+  const projects = response?.projects || [];
 
   // Calculate stats
   const stats = {
@@ -157,7 +160,7 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" data-testid="projects-grid">
             {projects.map((project: any) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project._id || project.id} project={project} />
             ))}
           </div>
         )}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -16,6 +16,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 export default function SignupPage() {
   const { toast } = useToast();
   const { setAuth } = useAuthStore();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SignupData>({
@@ -35,6 +36,7 @@ export default function SignupPage() {
         title: 'Welcome to VibeCoders!',
         description: 'Your account has been created successfully.',
       });
+      setLocation('/dashboard');
     },
     onError: (error: any) => {
       toast({
