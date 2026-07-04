@@ -1,9 +1,13 @@
 import { Check, Circle, Code, FileText, Layers, MessageSquare, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Workflow } from '@shared/schema';
 
 interface WorkflowStepperProps {
-  workflow: Workflow;
+  workflow: {
+    stage: string;
+    status: string;
+    results?: Record<string, any>;
+    [key: string]: any;
+  };
 }
 
 const steps = [
@@ -90,11 +94,11 @@ export function WorkflowStepper({ workflow }: WorkflowStepperProps) {
                 )}
                 {(status === 'completed' || status === 'current') && step.id !== 'completed' && (
                   <div className="mt-2 text-xs text-muted-foreground">
-                    {step.id === 'planning' && workflow.planningAnswers && `${workflow.planningAnswers ? Object.keys(workflow.planningAnswers).length : 0} questions answered`}
-                    {step.id === 'blueprint' && workflow.blueprint && 'Tech stack defined'}
-                    {step.id === 'hld' && workflow.hld && 'Architecture designed'}
-                    {step.id === 'lld' && workflow.lld && 'Specifications completed'}
-                    {step.id === 'codegen' && workflow.codegenPlan && `${(workflow.files as any[])?.length || 0} files generated`}
+                    {step.id === 'planning' && Boolean(workflow.planningAnswers) && `${Object.keys(workflow.planningAnswers as Record<string, any>).length} questions answered`}
+                    {step.id === 'blueprint' && Boolean(workflow.blueprint) && 'Tech stack defined'}
+                    {step.id === 'hld' && Boolean(workflow.hld) && 'Architecture designed'}
+                    {step.id === 'lld' && Boolean(workflow.lld) && 'Specifications completed'}
+                    {step.id === 'codegen' && Boolean(workflow.codegenPlan) && `${(workflow.files as any[])?.length || 0} files generated`}
                   </div>
                 )}
               </div>
